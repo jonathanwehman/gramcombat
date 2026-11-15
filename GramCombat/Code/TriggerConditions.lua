@@ -163,7 +163,7 @@ Example:
 			if UnitIsDeadOrGhost("player") then
 				return false
 			end
-			return UnitMana("player")/UnitManaMax("player") >= param
+			return UnitPower("player", 0) / math.max(1, UnitPowerMax("player", 0)) >= param
 		end,
 	}
 ------------------------------------------------------------------------------------]]

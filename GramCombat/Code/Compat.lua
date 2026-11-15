@@ -149,6 +149,41 @@ function C.GetItemIcon(item)
 	if _G.GetItemIcon then return _G.GetItemIcon(item) end
 end
 
+function C.GetItemCount(item, ...)
+	if C_Item and C_Item.GetItemCount then return C_Item.GetItemCount(item, ...) or 0 end
+	if _G.GetItemCount then return _G.GetItemCount(item, ...) or 0 end
+	return 0
+end
+
+function C.ItemQualityColor(quality)
+	local colors = _G.ITEM_QUALITY_COLORS
+	if colors and quality and colors[quality] then return colors[quality] end
+	if quality and C_Item and C_Item.GetItemQualityColor then
+		local r, g, b, hex = C_Item.GetItemQualityColor(quality)
+		if hex then return { hex = "|c" .. hex } end
+	end
+end
+
+function C.BreakUpLargeNumbers(n)
+	if _G.BreakUpLargeNumbers then return _G.BreakUpLargeNumbers(n) end
+	local s = tostring(math.floor(n))
+	local out = s:reverse():gsub("(%d%d%d)", "%1,"):reverse()
+	return (out:gsub("^,", ""))
+end
+
+function C.UnitInVehicle(unit)
+	if _G.UnitInVehicle then return _G.UnitInVehicle(unit) end
+	return false
+end
+
+function C.GetSchoolString(school)
+	if C_Spell and C_Spell.GetSchoolString then
+		local ok, s = pcall(C_Spell.GetSchoolString, school)
+		if ok then return Plain(s) end
+	end
+	if _G.GetSchoolString then return _G.GetSchoolString(school) end
+end
+
 -- Addons ---------------------------------------------------------------------
 C.LoadAddOn = (C_AddOns and C_AddOns.LoadAddOn) or _G.LoadAddOn
 C.GetAddOnMetadata = (C_AddOns and C_AddOns.GetAddOnMetadata) or _G.GetAddOnMetadata

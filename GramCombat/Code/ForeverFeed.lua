@@ -107,7 +107,7 @@ local SCHOOL_NAMES = {
 	[64] = STRING_SCHOOL_ARCANE,
 }
 local function SchoolName(school)
-	return SCHOOL_NAMES[school] or (school and school > 0 and (GetSchoolString and GetSchoolString(school))) or nil
+	return SCHOOL_NAMES[school] or (school and school > 0 and C.GetSchoolString(school)) or nil
 end
 
 -------------------------------------------------------------------------------
@@ -415,8 +415,22 @@ end
 -------------------------------------------------------------------------------
 local running = false
 
+-- /gc debug: print what the game actually sends, so problems can be traced
+ns.debugFeed = false
+local function show(v)
+	if v == nil then return "nil" end
+	if IsSecret(v) then return "|cffff9900hidden|r" end
+	return tostring(v)
+end
+local function DebugUnitCombat(unit, action, flagText, amount, school)
+	if not ns.debugFeed then return end
+	print(("|cffff4fa3Gram Combat|r UNIT_COMBAT %s %s %s %s school=%s"):format(
+		show(unit), show(action), show(flagText), show(amount), show(school)))
+end
+
 Feed:SetScript("OnEvent", function(_, event, ...)
 	if event == "UNIT_COMBAT" then
+		DebugUnitCombat(...)
 		C.SafeCall(OnUnitCombat, ...)
 	elseif event == "UNIT_SPELLCAST_SUCCEEDED" then
 		C.SafeCall(OnCastSucceeded, ...)
@@ -459,6 +473,27 @@ function ns.StartFeed()
 	TryRegister("PLAYER_ENTERING_WORLD")
 	TryRegister("PLAYER_REGEN_ENABLED")
 	for u in next, auraUnits do C.SafeCall(Resync, u) end
+end
+
+-- /gc test: push a few fake hits through the whole display
+function ns.TestFeed()
+	local me, myName = UnitGUID("player"), UnitName("player")
+	Emit("SWING_DAMAGE", "", "", FLAGS_UNKNOWN_ENEMY, me, myName, FLAGS_ME, 142, -1, 1, nil, nil, nil, false, false, false, false)
+	Emit("SPELL_DAMAGE", "", "", FLAGS_UNKNOWN_ENEMY, me, myName, FLAGS_ME, nil, STRING_SCHOOL_FIRE, 4, 388, -1, 4, nil, nil, nil, true, false, false, false)
+	Emit("SPELL_HEAL", "", "", 0, me, myName, FLAGS_ME, nil, STRING_SCHOOL_HOLY, 2, 260, 0, 0, false)
+	Emit("SWING_DAMAGE", me, myName, FLAGS_ME, "Creature-0-0-0-0-0-0", "Test Dummy", FLAGS_UNKNOWN_ENEMY, 97, -1, 1, nil, nil, nil, false, false, false, false)
+	Emit("SPELL_DAMAGE", me, myName, FLAGS_ME, "Creature-0-0-0-0-0-0", "Test Dummy", FLAGS_UNKNOWN_ENEMY, 133, (C.GetSpellInfo(133)) or "Fireball", 4, 512, -1, 4, nil, nil, nil, true, false, false, false)
+	Emit("SWING_MISSED", me, myName, FLAGS_ME, "Creature-0-0-0-0-0-0", "Test Dummy", FLAGS_UNKNOWN_ENEMY, "PARRY", false, 0)
+end
+
+function ns.FeedStatus()
+	local regs = {}
+	for _, e in ipairs({ "UNIT_COMBAT", "UNIT_AURA", "UNIT_SPELLCAST_SUCCEEDED" }) do
+		regs[#regs + 1] = e .. "=" .. tostring(Feed:IsEventRegistered(e) and "on" or "OFF")
+	end
+	local n = 0
+	for _ in next, handlers do n = n + 1 end
+	return ("feed %s, listeners %d, %s"):format(running and "running" or "STOPPED", n, table.concat(regs, " "))
 end
 
 function ns.StopFeed()

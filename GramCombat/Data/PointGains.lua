@@ -65,7 +65,10 @@ local function parseHonorGain(chatmsg)
 				"icon", icon
 			)
 		else
-			local info = C_CurrencyInfo.GetCurrencyInfo(1901)
+			local info = C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo(1901)
+			if not info then
+				return newDict("currency", _G.HONOR, "amount", amount, "total", amount)
+			end
 			return newDict(
 				"currency", info.name,
 				"amount", amount,

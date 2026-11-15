@@ -1,5 +1,11 @@
 # Gram Combat
 
+## 1.0.1
+- Fixed the loot error (an old item-count call the new client removed)
+- Replaced a few more removed calls (mana check, honor, vehicle, number formatting)
+- The settings menu now opens even if one page has a problem
+- New: `/gc test` sends fake hits so you can see the layout; `/gc debug` prints what the game sends
+
 ## 1.0.0
 - First release for WoW Forever (Interface 16001)
 - New combat feed: Forever closed the combat log to addons, so Gram Combat reads

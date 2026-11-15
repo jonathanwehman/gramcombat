@@ -871,7 +871,7 @@ Parrot:RegisterSecondaryTriggerCondition {
 	localName = L["In vehicle"],
 	notLocalName = L["Not in vehicle"],
 	check = function()
-		return UnitInVehicle("player")
+		return ns.C.UnitInVehicle("player")
 	end,
 	exclusive = true
 }

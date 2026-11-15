@@ -271,8 +271,19 @@ function Parrot:OnInitialize()
 	SLASH_GRAMCOMBAT1 = "/gc"
 	SLASH_GRAMCOMBAT2 = "/gramcombat"
 	SLASH_GRAMCOMBAT3 = "/gcombat"
-	function SlashCmdList.GRAMCOMBAT()
-		self:ShowConfig()
+	function SlashCmdList.GRAMCOMBAT(msg)
+		msg = (msg or ""):lower():match("^%s*(%S*)")
+		local tag = "|cffff4fa3Gram Combat|r "
+		if msg == "test" then
+			ns.TestFeed()
+			print(tag .. "sent test hits.")
+		elseif msg == "debug" then
+			ns.debugFeed = not ns.debugFeed
+			print(tag .. "debug " .. (ns.debugFeed and "ON: hit something and every raw combat event prints here." or "off."))
+			print(tag .. ns.FeedStatus())
+		else
+			self:ShowConfig()
+		end
 	end
 
 	-- Forever feed settings
@@ -425,16 +436,18 @@ end
 
 function Parrot:ShowConfig()
 	if self.OnOptionsCreate then
-		self:OnOptionsCreate()
+		local create = self.OnOptionsCreate
+		self.OnOptionsCreate = nil
+		local ok, err = pcall(create, self)
+		if not ok then geterrorhandler()(err) end
 
-		for _, mod in self:IterateModules() do
+		for name, mod in self:IterateModules() do
 			if type(mod.OnOptionsCreate) == "function" then
-				mod:OnOptionsCreate()
+				local okm, errm = pcall(mod.OnOptionsCreate, mod)
+				if not okm then geterrorhandler()(("Gram Combat options (%s): %s"):format(tostring(name), tostring(errm))) end
 			end
 		end
 		AceConfig:RegisterOptionsTable("GramCombat", self.options)
-
-		self.OnOptionsCreate = nil
 	end
 
 	AceConfigDialog:Open("GramCombat")

@@ -16,7 +16,8 @@ local LOOT_ITEM_CREATED_SELF = _G.LOOT_ITEM_CREATED_SELF
 local LOOT_ITEM_CREATED_SELF_MULTIPLE = _G.LOOT_ITEM_CREATED_SELF_MULTIPLE
 local LOOT_ITEM_REFUND = _G.LOOT_ITEM_REFUND
 local LOOT_ITEM_REFUND_MULTIPLE = _G.LOOT_ITEM_REFUND_MULTIPLE
-local ITEM_QUALITY_COLORS = _G.ITEM_QUALITY_COLORS
+local ItemQualityColor = ns.C.ItemQualityColor
+local GetItemCount = ns.C.GetItemCount
 
 local function parse_CHAT_MSG_LOOT(chatmsg)
 	-- check for multiple
@@ -51,8 +52,9 @@ local function parse_CHAT_MSG_LOOT(chatmsg)
 			amount = 1
 		end
 		local name, _, quality, _, _, _, _, _, _, texture = GetItemInfo(itemLink)
-		local color = ITEM_QUALITY_COLORS[quality]
-		if color then
+		local color = ItemQualityColor(quality)
+		if not name then name = itemLink end
+		if color and color.hex then
 			name = ("%s%s|r"):format(color.hex, name)
 		end
 

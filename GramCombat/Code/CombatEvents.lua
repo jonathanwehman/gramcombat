@@ -477,7 +477,7 @@ function module:OnOptionsCreate()
 					breakUpAmount = {
 						type = 'toggle',
 						name = L["Break up amounts"],
-						desc = L["Break up number values with '%s' (26500 -> %s)"]:format(LARGE_NUMBER_SEPERATOR, BreakUpLargeNumbers(26500)),
+						desc = L["Break up number values with '%s' (26500 -> %s)"]:format(LARGE_NUMBER_SEPERATOR, ns.C.BreakUpLargeNumbers(26500)),
 						disabled = function() return db.shortenAmount end,
 						order = 8,
 					}
@@ -1691,7 +1691,7 @@ function module:ShortenAmount(val)
 	if db.shortenAmount then
 		return shortenAmount(val)
 	elseif db.breakUpAmount then
-		return BreakUpLargeNumbers(val)
+		return ns.C.BreakUpLargeNumbers(val)
 	end
 	return val
 end
