@@ -1,5 +1,12 @@
 # Gram Combat
 
+## 1.0.2
+- New default layout: incoming stacked right-aligned against your player frame
+  (bottom left), outgoing stacked left-aligned with spell icons by your target
+  frame (bottom right), loot and power gains in small text near the top
+- Smaller, cleaner text (14 normal, 20 for crits, thin outline)
+- Your existing setup is moved to the new layout once on update
+
 ## 1.0.1
 - Fixed the loot error (an old item-count call the new client removed)
 - Replaced a few more removed calls (mana check, honor, vehicle, number formatting)

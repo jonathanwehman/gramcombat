@@ -34,6 +34,44 @@ local rebuildChoices do
 	end
 end
 
+-- Gram Combat layout: incoming stacked right-aligned against your player frame
+-- (bottom left), outgoing stacked left-aligned with icons beside your target
+-- frame (bottom right), loot / power gains in small text near the top.
+function ns.GramLayout()
+	return {
+		["Notification"] = {
+			animationStyle = "Straight",
+			direction = "DOWN;CENTER",
+			stickyAnimationStyle = "Static",
+			stickyDirection = "DOWN;CENTER",
+			size = 70,
+			xOffset = 0,
+			yOffset = 340,
+			iconSide = "LEFT",
+		},
+		["Incoming"] = {
+			animationStyle = "Straight",
+			direction = "DOWN;RIGHT",
+			stickyAnimationStyle = "Pow",
+			stickyDirection = "DOWN;RIGHT",
+			size = 150,
+			xOffset = -235,
+			yOffset = -235,
+			iconSide = "RIGHT",
+		},
+		["Outgoing"] = {
+			animationStyle = "Straight",
+			direction = "DOWN;LEFT",
+			stickyAnimationStyle = "Pow",
+			stickyDirection = "DOWN;LEFT",
+			size = 150,
+			xOffset = 315,
+			yOffset = -255,
+			iconSide = "LEFT",
+		},
+	}
+end
+
 local updateFuncs = {
 	[1] = function()
 		-- Copy the defaults into the db
@@ -54,40 +92,7 @@ local updateFuncs = {
 			end
 		end
 
-		-- Gram Combat default layout: incoming beside your player frame,
-		-- outgoing beside your target frame, announcements up top.
-		local defaultScrollAreas = {
-			["Notification"] = {
-				animationStyle = "Straight",
-				direction = "UP;CENTER",
-				stickyAnimationStyle = "Pow",
-				stickyDirection = "UP;CENTER",
-				size = 120,
-				xOffset = 0,
-				yOffset = 320,
-				iconSide = "LEFT",
-			},
-			["Incoming"] = {
-				animationStyle = "Straight",
-				direction = "UP;CENTER",
-				stickyAnimationStyle = "Pow",
-				stickyDirection = "UP;CENTER",
-				size = 200,
-				xOffset = -330,
-				yOffset = -160,
-				iconSide = "LEFT",
-			},
-			["Outgoing"] = {
-				animationStyle = "Straight",
-				direction = "UP;CENTER",
-				stickyAnimationStyle = "Pow",
-				stickyDirection = "UP;CENTER",
-				size = 200,
-				xOffset = 330,
-				yOffset = -160,
-				iconSide = "RIGHT",
-			},
-		}
+		local defaultScrollAreas = ns.GramLayout()
 		merge(db.areas, defaultScrollAreas)
 	end,
 	[2] = function()
@@ -103,6 +108,16 @@ local updateFuncs = {
 		if db.areas[L["Notification"]] and L["Notification"] ~= "Notification" then
 			db.areas["Notification"] = db.areas[L["Notification"]]
 			db.areas[L["Notification"]] = nil
+		end
+	end,
+	[3] = function()
+		-- Gram Combat 1.0.2: move the three main areas to the Gram layout once
+		local layout = ns.GramLayout()
+		for name, v in next, layout do
+			db.areas[name] = db.areas[name] or {}
+			for k, val in next, v do
+				db.areas[name][k] = val
+			end
 		end
 	end,
 }

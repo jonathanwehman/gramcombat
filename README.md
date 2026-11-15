@@ -2,7 +2,9 @@
 
 Clean floating combat text for **WoW Forever**. Made to sit next to Gram Frames.
 
-**Version 1.0.1** · Interface 16001 · type `/gc` in game
+**Version 1.0.2** · Interface 16001 · type `/gc` in game
+
+- `/gc` settings · `/gc test` fake hits to check the layout · `/gc debug` print what the game sends
 
 ## Install
 1. **[Download GramCombat.zip](https://github.com/jonathanwehman/gramcombat/raw/main/GramCombat.zip)**
@@ -10,9 +12,9 @@ Clean floating combat text for **WoW Forever**. Made to sit next to Gram Frames.
 3. Log in and type `/gc`. Under Scroll areas, turn on Configuration mode to drag things where you want.
 
 ## Layout
-- **Incoming** (damage and heals you take): beside your player frame
-- **Outgoing** (your hits and heals): beside your target frame
-- **Notification** (buffs, combat in/out, loot, cooldowns ready): near the top
+- **Incoming** (damage and heals you take): bottom left, stacked right-aligned against your player frame
+- **Outgoing** (your hits and heals): bottom right, stacked left-aligned with spell icons
+- **Notification** (loot, power gains, buffs, combat in/out): small text near the top
 
 ## How it works on Forever
 WoW Forever doesn't let addons read the combat log. Gram Combat reads what the
