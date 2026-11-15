@@ -2,7 +2,7 @@
 
 Clean floating combat text for **WoW Forever**. Made to sit next to Gram Frames.
 
-**Version 1.0.2** · Interface 16001 · type `/gc` in game
+**Version 1.0.3** · Interface 16001 · type `/gc` in game
 
 - `/gc` settings · `/gc test` fake hits to check the layout · `/gc debug` print what the game sends
 

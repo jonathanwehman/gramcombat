@@ -256,17 +256,6 @@ function Parrot:OnInitialize()
 		args = {},
 	}
 
-	-- stub options table to show in Interface Options
-	local options = CopyTable(self.options)
-	options.args.load = {
-		type = "execute",
-		name = L["Load config"],
-		desc = L["Load configuration options"],
-		func = "ShowConfig",
-		handler = self,
-	}
-	AceConfig:RegisterOptionsTable("GramCombat/Blizzard", options)
-	AceConfigDialog:AddToBlizOptions("GramCombat/Blizzard", "Gram Combat")
 
 	SLASH_GRAMCOMBAT1 = "/gc"
 	SLASH_GRAMCOMBAT2 = "/gramcombat"
@@ -327,6 +316,12 @@ end
 
 function Parrot:OnEnable()
 	ns.StartFeed()
+	-- build the settings right away so they live in the game's Options panel
+	if C_Timer and C_Timer.After then
+		C_Timer.After(0, function() self:BuildOptions() end)
+	else
+		self:BuildOptions()
+	end
 end
 
 function Parrot:OnDisable()
@@ -434,7 +429,11 @@ do
 	LibSharedMedia.RegisterCallback(Parrot, "LibSharedMedia_Registered", rebuild)
 end
 
-function Parrot:ShowConfig()
+-- Builds every settings page once and adds them to Options > AddOns > Gram Combat,
+-- each section as its own page in the sidebar.
+function Parrot:BuildOptions()
+	if self.optionsBuilt then return end
+	self.optionsBuilt = true
 	if self.OnOptionsCreate then
 		local create = self.OnOptionsCreate
 		self.OnOptionsCreate = nil
@@ -450,6 +449,33 @@ function Parrot:ShowConfig()
 		AceConfig:RegisterOptionsTable("GramCombat", self.options)
 	end
 
+	local ok, err = pcall(function()
+		AceConfigDialog:AddToBlizOptions("GramCombat", "Gram Combat", nil, "general")
+		local pages = {}
+		for key, group in next, self.options.args do
+			if key ~= "general" and type(group) == "table" and group.type == "group" then
+				pages[#pages + 1] = key
+			end
+		end
+		table.sort(pages, function(a, b)
+			local oa, ob = self.options.args[a].order or 100, self.options.args[b].order or 100
+			if oa < 0 then oa = 1000 - oa end
+			if ob < 0 then ob = 1000 - ob end
+			if oa == ob then return a < b end
+			return oa < ob
+		end)
+		for _, key in ipairs(pages) do
+			local name = self.options.args[key].name
+			if type(name) == "function" then name = name() end
+			AceConfigDialog:AddToBlizOptions("GramCombat", name or key, "Gram Combat", key)
+		end
+	end)
+	if not ok then geterrorhandler()(err) end
+end
+
+function Parrot:ShowConfig()
+	self:BuildOptions()
+	AceConfigDialog:SetDefaultSize("GramCombat", 860, 640)
 	AceConfigDialog:Open("GramCombat")
 end
 

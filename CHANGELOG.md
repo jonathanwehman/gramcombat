@@ -1,5 +1,11 @@
 # Gram Combat
 
+## 1.0.3
+- All settings now live in the game's Options > AddOns > Gram Combat, with
+  pages for Events, Triggers, Scroll areas, Suppressions, Cooldowns and Profiles
+  (no more "Load config" button)
+- `/gc` opens the same settings in a bigger window
+
 ## 1.0.2
 - New default layout: incoming stacked right-aligned against your player frame
   (bottom left), outgoing stacked left-aligned with spell icons by your target
