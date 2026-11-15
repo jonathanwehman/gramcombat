@@ -2,7 +2,7 @@
 ## Title: |cffff4fa3Gram|r Combat
 ## Notes: Clean floating combat text for WoW Forever. Incoming by your frame, outgoing by your target, announcements up top. /gc
 ## Author: Jon (Grahamaton)
-## Version: 1.1.0
+## Version: 1.2.0
 ## IconTexture: Interface\AddOns\GramCombat\Media\icon
 ## AddonCompartmentFunc: GramCombat_OnAddonCompartmentClick
 ## Category: Combat

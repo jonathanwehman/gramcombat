@@ -1,5 +1,10 @@
 # Gram Combat
 
+## 1.2.0
+- Resize the text areas: in Unlock & Move, drag the pink corner of a box; the
+  box height is how far the text scrolls
+- Screenshots and CurseForge release
+
 ## 1.1.0
 - Real hits now show: Forever hides damage and heal numbers from addons, so
   Gram Combat hands them straight to the screen without reading them

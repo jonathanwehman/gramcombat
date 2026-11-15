@@ -185,14 +185,15 @@ local function AlignOf(a)
 end
 
 local MOVER_W = 170
+local MIN_W, MIN_H, MAX_W, MAX_H = 80, 40, 700, 700
 
 local function PlaceMover(m)
 	local a = AreaDB(m.key)
 	if not a then m:Hide() return end
-	m:SetSize(MOVER_W, math.max(40, a.size or 150))
+	m:SetSize(a.boxWidth or MOVER_W, math.max(MIN_H, a.size or 150))
 	m:ClearAllPoints()
 	m:SetPoint(AlignOf(a), UIParent, "CENTER", a.xOffset or 0, a.yOffset or 0)
-	m.coords:SetText(("%d, %d"):format(a.xOffset or 0, a.yOffset or 0))
+	m.coords:SetText(("%d, %d  ·  %d tall"):format(a.xOffset or 0, a.yOffset or 0, a.size or 150))
 end
 
 local function SaveMover(m)
@@ -207,6 +208,9 @@ local function SaveMover(m)
 	local _, cy = m:GetCenter()
 	a.xOffset = math.floor(x - ux + 0.5)
 	a.yOffset = math.floor(cy - uy + 0.5)
+	-- the box's height is how far the text scrolls; its width marks the lane
+	a.size = math.floor(math.max(MIN_H, math.min(MAX_H, m:GetHeight())) + 0.5)
+	a.boxWidth = math.floor(math.max(MIN_W, math.min(MAX_W, m:GetWidth())) + 0.5)
 	PlaceMover(m)
 end
 
@@ -228,6 +232,32 @@ local function MakeMover(info)
 	m.hint:SetPoint("TOP", m.title, "BOTTOM", 0, -3)
 	m.coords = Label(m, 10, MUTED, "")
 	m.coords:SetPoint("BOTTOM", 0, 6)
+	m:SetResizable(true)
+	if m.SetResizeBounds then
+		m:SetResizeBounds(MIN_W, MIN_H, MAX_W, MAX_H)
+	elseif m.SetMinResize then
+		m:SetMinResize(MIN_W, MIN_H); m:SetMaxResize(MAX_W, MAX_H)
+	end
+	-- resize grip, bottom right corner
+	local grip = CreateFrame("Button", nil, m)
+	grip:SetSize(16, 16)
+	grip:SetPoint("BOTTOMRIGHT", -2, 2)
+	grip:SetFrameLevel(m:GetFrameLevel() + 5)
+	for i = 1, 3 do
+		local t = Tex(grip, "OVERLAY", ACCENT, 1)
+		t:SetSize(i * 4, 2)
+		t:SetPoint("BOTTOMRIGHT", 0, (i - 1) * 4)
+	end
+	grip:SetScript("OnMouseDown", function() m:StartSizing("BOTTOMRIGHT") end)
+	grip:SetScript("OnMouseUp", function()
+		m:StopMovingOrSizing()
+		SaveMover(m)
+	end)
+	grip:SetScript("OnEnter", function() m:SetBorderColor(1, 1, 1) end)
+	grip:SetScript("OnLeave", function() m:SetBorderColor(ACCENT[1], ACCENT[2], ACCENT[3]) end)
+	m:SetScript("OnSizeChanged", function(self, w, h)
+		self.coords:SetText(("%d tall"):format(h or 0))
+	end)
 	m:SetScript("OnDragStart", function(self) self:StartMoving() end)
 	m:SetScript("OnDragStop", function(self)
 		self:StopMovingOrSizing()
@@ -247,7 +277,7 @@ local function MakeMoverBar()
 	Fill(f, PANEL, 0.95)
 	Border(f)
 	local t = Label(f, 13, TEXT)
-	t:SetText("|cffff4fa3Gram|r Combat  ·  drag the pink boxes")
+	t:SetText("|cffff4fa3Gram|r Combat  ·  drag to move  ·  corner to resize")
 	t:SetPoint("TOP", 0, -10)
 	local lock = Button(f, "Lock", function() UI:Lock() end, 100)
 	lock:SetPoint("BOTTOMRIGHT", -10, 8)
@@ -325,7 +355,7 @@ end
 
 local function Build()
 	local f = CreateFrame("Frame", "GramCombatPanel", UIParent)
-	f:SetSize(560, 600)
+	f:SetSize(560, 560)
 	f:SetPoint("CENTER")
 	f:SetFrameStrata("DIALOG")
 	f:SetToplevel(true)
