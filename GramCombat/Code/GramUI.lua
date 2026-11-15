@@ -355,7 +355,7 @@ end
 
 local function Build()
 	local f = CreateFrame("Frame", "GramCombatPanel", UIParent)
-	f:SetSize(560, 560)
+	f:SetSize(560, 590)
 	f:SetPoint("CENTER")
 	f:SetFrameStrata("DIALOG")
 	f:SetToplevel(true)
@@ -455,6 +455,15 @@ local function Build()
 	Row("XP, Rep & Honor", Toggle(f,
 		function() return EventEnabled("Notification", "Experience gains", "Reputation gains", "Currency gains") end,
 		function(v) SetEvents("Notification", v, "Experience gains", "Reputation gains", "Reputation losses", "Currency gains", "Skill gains") end))
+	Row("Blizzard's Numbers", Toggle(f,
+		function()
+			local ok, v = pcall(GetCVar, "floatingCombatTextCombatDamage")
+			return not ok or v ~= "0"
+		end,
+		function(v)
+			pcall(SetCVar, "floatingCombatTextCombatDamage", v and "1" or "0")
+			pcall(SetCVar, "floatingCombatTextCombatHealing", v and "1" or "0")
+		end))
 	EndRows()
 	y = y - 6
 

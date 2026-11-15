@@ -4,7 +4,7 @@
 
 Clean floating combat text for **WoW Forever**. Made to sit next to Gram Frames.
 
-**Version 1.2.0** · Interface 16001 · type `/gc` in game
+**Version 1.2.1** · Interface 16001 · type `/gc` in game
 
 ## Install
 1. **[Download GramCombat.zip](https://github.com/jonathanwehman/gramcombat/raw/main/GramCombat.zip)**, or get it from CurseForge.

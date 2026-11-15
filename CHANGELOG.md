@@ -1,5 +1,11 @@
 # Gram Combat
 
+## 1.2.1
+- Fixed hits showing twice: one mob seen as target, nameplate and soft target
+  now only counts once, even when Forever hides who the mob is
+- New switch: Blizzard's Numbers, to turn off the game's own damage numbers
+  over the mob's head
+
 ## 1.2.0
 - Resize the text areas: in Unlock & Move, drag the pink corner of a box; the
   box height is how far the text scrolls

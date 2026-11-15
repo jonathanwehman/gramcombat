@@ -193,6 +193,37 @@ local function Seen(key)
 	seen[key] = true
 end
 
+-- One mob can show up as several unit tokens (target, nameplate3, softenemy,
+-- focus...) and the game reports the hit once per token. Forever hides GUIDs
+-- and names on many of those, so a per-token key would double every hit.
+-- Returns nil when this token is just another view of your target.
+local function UnitKey(unit, guid, name, hostile)
+	if unit ~= "target" and call(UnitIsUnit, unit, "target") then return nil end
+	if guid and guid ~= "" then return guid end
+	if name and name ~= "" then return name end
+	-- unknown identity
+	return hostile and "?hostile" or "?friendly"
+end
+
+-- Duplicate check for one hit. "generic" describes the hit without saying
+-- which mob took it. A token whose mob can't be identified is skipped when
+-- any copy of this hit was already shown this frame; a known mob is skipped
+-- when an unidentified copy was already shown.
+local function SeenHit(key, generic)
+	local now = GetTime()
+	if now ~= seenTime then wipe(seen); seenTime = now end
+	local g = seen["g:" .. generic]
+	if key:sub(1, 1) == "?" then
+		if g then return true end
+		seen["g:" .. generic] = "unknown"
+		return false
+	end
+	if g == "unknown" or seen[key .. "|" .. generic] then return true end
+	seen[key .. "|" .. generic] = true
+	seen["g:" .. generic] = seen["g:" .. generic] or "known"
+	return false
+end
+
 local function Solo()
 	return not IsInGroup()
 end
@@ -227,12 +258,12 @@ local function OnSecretHit(unit, action, isCrit, school, rawAmount)
 
 	local guid, name, _, hostile = UnitInfo(unit)
 	if call(UnitIsUnit, unit, "player") then return end
-	local key = (guid ~= "" and guid) or name
-	if key == "" then key = unit end
+	local key = UnitKey(unit, guid, name, hostile)
+	if not key then return end
 
 	if hostile and IsHostileToken(unit) and action == "WOUND" then
 		if not settings.outgoing then return end
-		if Seen(SecretKey(key, action, school, isCrit and 1 or 0)) then return end
+		if SeenHit(key, SecretKey("H", action, school, isCrit and 1 or 0)) then return end
 		local c = MatchCast("harm", key, name, physical)
 		if not c then
 			if call(UnitIsTapDenied, unit) then return end
@@ -245,7 +276,7 @@ local function OnSecretHit(unit, action, isCrit, school, rawAmount)
 			icon = c and C.GetSpellTexture(c.id) or nil })
 	elseif not hostile and action == "HEAL" and friendlyTokens[unit] then
 		if not settings.heals then return end
-		if Seen(SecretKey(key, "HEAL", school)) then return end
+		if SeenHit(key, SecretKey("F", "HEAL", school)) then return end
 		local c = MatchCast("help", key, name)
 		if c then
 			Secret:Show("Outgoing", "+%s", rawAmount, { color = "4dff4d", crit = isCrit,
@@ -328,11 +359,11 @@ local function OnUnitCombat(unit, action, flagText, amount, school)
 	-------------------------------------------------------------- outgoing
 	local guid, name, flags, hostile = UnitInfo(unit)
 	if call(UnitIsUnit, unit, "player") then return end
-	local key = (guid ~= "" and guid) or name
-	if key == "" then key = unit end
+	local key = UnitKey(unit, guid, name, hostile)
+	if not key then return end
 
 	if hostile and IsHostileToken(unit) then
-		if Seen(key .. action .. tostring(amount)) then return end
+		if SeenHit(key, SecretKey("H", action, tostring(amount), school)) then return end
 		local isDamage = action == "WOUND" and amount and amount > 0
 		if not isDamage and not MISS_ACTIONS[action] then return end
 
@@ -368,7 +399,7 @@ local function OnUnitCombat(unit, action, flagText, amount, school)
 
 	-- your heals on friends: only when they line up with one of your casts
 	if not hostile and action == "HEAL" and amount and amount > 0 and friendlyTokens[unit] then
-		if Seen(key .. "HEAL" .. tostring(amount)) then return end
+		if SeenHit(key, SecretKey("F", "HEAL", tostring(amount))) then return end
 		local c = MatchCast("help", key, name)
 		if c then
 			Emit("SPELL_HEAL", playerGUID, playerName, FLAGS_ME, guid, name, flags,
