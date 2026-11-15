@@ -1,0 +1,36 @@
+## Interface: 16001
+## Title: |cffff4fa3Gram|r Combat
+## Notes: Clean floating combat text for WoW Forever. Incoming by your frame, outgoing by your target, announcements up top. /gc
+## Author: Jon (Grahamaton)
+## Version: 1.0.0
+## IconTexture: Interface\AddOns\GramCombat\Media\icon
+## AddonCompartmentFunc: GramCombat_OnAddonCompartmentClick
+## Category: Combat
+## X-Category: Combat
+## X-License: LGPLv2.1
+## X-Credits: Built on Parrot 2 by ckknight, Neb and profalbert (LGPL v2.1). Thank you.
+## SavedVariables: GramCombatDB
+## OptionalDeps: Ace3, LibSharedMedia-3.0, LibDDI-1.0, LibSink-2.0, EllesmereUI, ElvUI, SharedMedia
+
+embeds.xml
+locales.xml
+
+Code\Compat.lua
+Code\ForeverFeed.lua
+Code\Parrot.lua
+Code\AnimationStyles.lua
+Code\CombatEvents.lua
+Code\Display.lua
+Code\ScrollAreas.lua
+Code\Suppressions.lua
+Code\TriggerConditions.lua
+Code\Triggers.lua
+
+Data\AnimationStyles.lua
+Data\CombatEvents.lua
+Data\TriggerConditions.lua
+Data\Auras.lua
+Data\Cooldowns.lua
+Data\Loot.lua
+Data\PointGains.lua
+Data\CombatStatus.lua
