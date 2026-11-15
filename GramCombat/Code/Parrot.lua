@@ -263,7 +263,11 @@ function Parrot:OnInitialize()
 	function SlashCmdList.GRAMCOMBAT(msg)
 		msg = (msg or ""):lower():match("^%s*(%S*)")
 		local tag = "|cffff4fa3Gram Combat|r "
-		if msg == "test" then
+		if msg == "move" or msg == "unlock" or msg == "lock" then
+			ns.UI:ToggleLock()
+		elseif msg == "advanced" or msg == "options" then
+			self:ShowAdvanced()
+		elseif msg == "test" then
 			ns.TestFeed()
 			print(tag .. "sent test hits.")
 		elseif msg == "debug" then
@@ -276,7 +280,7 @@ function Parrot:OnInitialize()
 	end
 
 	-- Forever feed settings
-	self.foreverDB = self.db:RegisterNamespace("Forever", { profile = { groupGuess = false, auras = true } })
+	self.foreverDB = self.db:RegisterNamespace("Forever", { profile = { groupGuess = false, auras = true, incoming = true, outgoing = true, heals = true, spellNames = false } })
 	ns.SetFeedSettings(self.foreverDB.profile)
 
 	local LibSink = LibStub("LibSink-2.0")
@@ -473,7 +477,13 @@ function Parrot:BuildOptions()
 	if not ok then geterrorhandler()(err) end
 end
 
+-- the Gram Combat panel
 function Parrot:ShowConfig()
+	ns.UI:Toggle()
+end
+
+-- the full (old Parrot) settings, for the deep stuff
+function Parrot:ShowAdvanced()
 	self:BuildOptions()
 	AceConfigDialog:SetDefaultSize("GramCombat", 860, 640)
 	AceConfigDialog:Open("GramCombat")

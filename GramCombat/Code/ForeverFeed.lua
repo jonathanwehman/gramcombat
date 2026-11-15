@@ -51,7 +51,7 @@ ns.FeedEmit = Emit
 -------------------------------------------------------------------------------
 -- Settings (stored by Parrot.lua in the "Forever" namespace)
 -------------------------------------------------------------------------------
-local settings = { groupGuess = false, auras = true }
+local settings = { groupGuess = false, auras = true, incoming = true, outgoing = true, heals = true, spellNames = false }
 function ns.SetFeedSettings(t) settings = t end
 
 -------------------------------------------------------------------------------
@@ -197,13 +197,82 @@ local function Solo()
 	return not IsInGroup()
 end
 
+-- Hidden (secret) amounts can't be read, so they skip the normal text system
+-- and go straight to the screen through SecretText.lua.
+local function SecretKey(...)
+	-- dedupe key without the hidden amount
+	return table.concat({ ... }, "|")
+end
+
+local function OnSecretHit(unit, action, isCrit, school, rawAmount)
+	local Secret = ns.Secret
+	if not Secret then return end
+	local color = Secret.SchoolColor(school)
+	local physical = school == 1
+
+	if unit == "player" then
+		if Seen(SecretKey("player", action, school, isCrit and 1 or 0)) then return end
+		if action == "WOUND" then
+			if not settings.incoming then return end
+			Secret:Show("Incoming", "-%s", rawAmount, { color = physical and "ff4d4d" or color, crit = isCrit })
+		elseif action == "HEAL" then
+			if not settings.heals then return end
+			local c = MatchCast("help", "player", playerName)
+			Secret:Show("Incoming", "+%s", rawAmount, { color = "4dff4d", crit = isCrit,
+				icon = c and C.GetSpellTexture(c.id) or nil })
+		end
+		return
+	end
+	if unit == "pet" then return end
+
+	local guid, name, _, hostile = UnitInfo(unit)
+	if call(UnitIsUnit, unit, "player") then return end
+	local key = (guid ~= "" and guid) or name
+	if key == "" then key = unit end
+
+	if hostile and IsHostileToken(unit) and action == "WOUND" then
+		if not settings.outgoing then return end
+		if Seen(SecretKey(key, action, school, isCrit and 1 or 0)) then return end
+		local c = MatchCast("harm", key, name, physical)
+		if not c then
+			if call(UnitIsTapDenied, unit) then return end
+			if not (Solo() or settings.groupGuess) then return end
+		end
+		local fmt = "%s"
+		if c and settings.spellNames then fmt = "%s " .. c.name end
+		if isCrit then fmt = fmt .. "!" end
+		Secret:Show("Outgoing", fmt, rawAmount, { color = color, crit = isCrit,
+			icon = c and C.GetSpellTexture(c.id) or nil })
+	elseif not hostile and action == "HEAL" and friendlyTokens[unit] then
+		if not settings.heals then return end
+		if Seen(SecretKey(key, "HEAL", school)) then return end
+		local c = MatchCast("help", key, name)
+		if c then
+			Secret:Show("Outgoing", "+%s", rawAmount, { color = "4dff4d", crit = isCrit,
+				icon = C.GetSpellTexture(c.id) })
+		end
+	end
+end
+
 local function OnUnitCombat(unit, action, flagText, amount, school)
 	if type(unit) ~= "string" then return end
 	action = Plain(action)
 	if not action then return end
 	flagText = Plain(flagText) or ""
-	amount = Plain(amount)
 	school = Plain(school) or 1
+	if amount ~= nil and IsSecret(amount) then
+		OnSecretHit(unit, action, flagText == "CRITICAL", school, amount)
+		return
+	end
+	amount = Plain(amount)
+	-- show / hide switches from the Gram Combat panel
+	if unit == "player" then
+		if action == "WOUND" and not settings.incoming then return end
+		if action == "HEAL" and not settings.heals then return end
+	elseif unit ~= "pet" then
+		if action == "HEAL" and not settings.heals then return end
+		if action ~= "HEAL" and not settings.outgoing then return end
+	end
 	local isCrit = flagText == "CRITICAL"
 	local isCrushing = flagText == "CRUSHING"
 	local isGlancing = flagText == "GLANCING"
@@ -484,6 +553,13 @@ function ns.TestFeed()
 	Emit("SWING_DAMAGE", me, myName, FLAGS_ME, "Creature-0-0-0-0-0-0", "Test Dummy", FLAGS_UNKNOWN_ENEMY, 97, -1, 1, nil, nil, nil, false, false, false, false)
 	Emit("SPELL_DAMAGE", me, myName, FLAGS_ME, "Creature-0-0-0-0-0-0", "Test Dummy", FLAGS_UNKNOWN_ENEMY, 133, (C.GetSpellInfo(133)) or "Fireball", 4, 512, -1, 4, nil, nil, nil, true, false, false, false)
 	Emit("SWING_MISSED", me, myName, FLAGS_ME, "Creature-0-0-0-0-0-0", "Test Dummy", FLAGS_UNKNOWN_ENEMY, "PARRY", false, 0)
+	-- the same display Forever's hidden numbers use
+	if ns.Secret then
+		ns.Secret:Show("Incoming", "-%s", 1893, { color = "ff4d4d" })
+		ns.Secret:Show("Incoming", "+%s", 733, { color = "4dff4d", icon = C.GetSpellTexture(2050) })
+		ns.Secret:Show("Outgoing", "%s!", 5546, { color = "ffe680", crit = true, icon = C.GetSpellTexture(20473) or C.GetSpellTexture(133) })
+		ns.Secret:Show("Outgoing", "%s", 30, { color = "ffffff", icon = C.GetSpellTexture(6603) })
+	end
 end
 
 function ns.FeedStatus()

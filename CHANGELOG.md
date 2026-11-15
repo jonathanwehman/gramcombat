@@ -1,5 +1,13 @@
 # Gram Combat
 
+## 1.1.0
+- Real hits now show: Forever hides damage and heal numbers from addons, so
+  Gram Combat hands them straight to the screen without reading them
+- New Gram Combat panel (`/gc`): Unlock & Move, Test, Reset Positions,
+  show/hide switches, text and crit size, spell icons and names
+- Drag-to-move boxes for Incoming, Outgoing and Notifications (`/gc move`)
+- The old Parrot settings are still there under "Advanced Settings"
+
 ## 1.0.3
 - All settings now live in the game's Options > AddOns > Gram Combat, with
   pages for Events, Triggers, Scroll areas, Suppressions, Cooldowns and Profiles

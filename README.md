@@ -2,14 +2,14 @@
 
 Clean floating combat text for **WoW Forever**. Made to sit next to Gram Frames.
 
-**Version 1.0.3** · Interface 16001 · type `/gc` in game
+**Version 1.1.0** · Interface 16001 · type `/gc` in game
 
-- `/gc` settings · `/gc test` fake hits to check the layout · `/gc debug` print what the game sends
+- `/gc` Gram Combat panel · `/gc move` drag the text areas · `/gc test` fake hits · `/gc advanced` every setting · `/gc debug` print what the game sends
 
 ## Install
 1. **[Download GramCombat.zip](https://github.com/jonathanwehman/gramcombat/raw/main/GramCombat.zip)**
 2. Unzip into `World of Warcraft\_forever_\Interface\AddOns` so you get `AddOns\GramCombat`.
-3. Log in and type `/gc`. Under Scroll areas, turn on Configuration mode to drag things where you want.
+3. Log in, type `/gc`, hit **Unlock & Move**, drag the pink boxes, then **Lock**.
 
 ## Layout
 - **Incoming** (damage and heals you take): bottom left, stacked right-aligned against your player frame
@@ -25,8 +25,11 @@ casts. Your hits get matched to your spells by timing and target.
 - In a group: only hits matched to your casts show. Auto attacks and DoT ticks
   can't be told apart from your group's, so they're hidden unless you turn on
   "Show unmatched hits in groups" under General.
-- Damage you take shows its school (Fire, Shadow...) but not the spell name; the
-  game doesn't share it.
+- Forever hides the damage and heal numbers themselves from addons. Gram Combat
+  passes them straight to the screen, so you still see the real numbers, but
+  hidden hits can't be added up into "(2x)" groups.
+- Damage you take is colored by school (Fire, Shadow...) but has no spell name;
+  the game doesn't share it.
 - Some buffs are hidden during combat on Forever; those are skipped.
 
 ## Thanks
